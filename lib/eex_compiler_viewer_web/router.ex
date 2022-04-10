@@ -17,7 +17,7 @@ defmodule EexCompilerViewerWeb.Router do
   scope "/", EexCompilerViewerWeb do
     pipe_through :browser
 
-    get "/", PageController, :index
+    live "/", ViewerLive.Index, :index
   end
 
   # Other scopes may use custom stacks.

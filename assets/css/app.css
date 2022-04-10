@@ -77,6 +77,10 @@
   font-weight: bold;
 }
 
+.bold {
+  font-weight: bold;
+}
+
 .phx-modal-close:hover,
 .phx-modal-close:focus {
   color: black;
@@ -97,6 +101,14 @@
 }
 .fade-out {
   animation: 0.2s ease-out 0s normal forwards 1 fade-out-keys;
+}
+
+.invisible {
+  visibility: hidden;
+}
+
+.visible {
+  visibility: visible;
 }
 
 @keyframes fade-in-scale-keys{

@@ -19,11 +19,18 @@ pre{padding: 1em;}
 
 .container{
   margin: 0 auto;
-  max-width: 80.0rem;
+  max-width: 160.0rem;
   padding: 0 2.0rem;
   position: relative;
   width: 100%
 }
+
+.two-cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
 select {
   width: auto;
 }
