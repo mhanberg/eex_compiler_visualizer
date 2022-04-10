@@ -1,0 +1,362 @@
+<!-- livebook:{"persist_outputs":true} -->
+<!-- vim: set syntax=markdown: -->
+
+
+# EEx Tests
+
+## Section
+
+```elixir
+assigns = %{
+  users: Enum.map(1..100_000, fn i -> %{name: "name#{i}"} end),
+  user: %{name: "carol"}
+}
+
+Benchee.run(
+  %{
+    "with_bitstring" => fn ->
+      EexCompilerViewer.with_bitstring(assigns)
+    end,
+    "with_concatenation" => fn ->
+      EexCompilerViewer.with_bitstring(assigns)
+    end,
+    "with_iolist" => fn ->
+      EexCompilerViewer.with_iolist(assigns)
+    end
+  },
+  warmup: 1,
+  time: 5,
+  memory_time: 2,
+  reduction_time: 2
+)
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+Operating System: macOS
+CPU Information: Apple M1
+Number of Available Cores: 8
+Available memory: 8 GB
+Elixir 1.13.3
+Erlang 24.0.1
+
+Benchmark suite executing with the following configuration:
+warmup: 1 s
+time: 5 s
+memory time: 2 s
+reduction time: 2 s
+parallel: 1
+inputs: none specified
+Estimated total run time: 30 s
+
+Benchmarking with_bitstring ...
+Benchmarking with_concatenation ...
+Benchmarking with_iolist ...
+
+Name                         ips        average  deviation         median         99th %
+with_concatenation         92.09       10.86 ms    ±21.12%       10.60 ms       14.60 ms
+with_bitstring             91.72       10.90 ms    ±20.73%       10.61 ms       15.11 ms
+with_iolist                42.52       23.52 ms    ±28.33%       22.32 ms       38.79 ms
+
+Comparison: 
+with_concatenation         92.09
+with_bitstring             91.72 - 1.00x slower +0.0435 ms
+with_iolist                42.52 - 2.17x slower +12.66 ms
+
+Memory usage statistics:
+
+Name                  Memory usage
+with_concatenation         7.63 MB
+with_bitstring             7.63 MB - 1.00x memory usage +0 MB
+with_iolist               13.73 MB - 1.80x memory usage +6.11 MB
+
+**All measurements for memory usage were the same**
+
+Reduction count statistics:
+
+Name                       average  deviation         median         99th %
+with_concatenation        594.60 K     ±0.28%       594.20 K       601.37 K
+with_bitstring            595.59 K     ±0.54%       594.78 K       611.22 K
+with_iolist              1974.70 K     ±0.31%      1972.97 K      1989.79 K
+
+Comparison: 
+with_concatenation        594.20 K
+with_bitstring            595.59 K - 1.00x reduction count +0.98 K
+with_iolist              1974.70 K - 3.32x reduction count +1380.09 K
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+%Benchee.Suite{
+  configuration: %Benchee.Configuration{
+    after_each: nil,
+    after_scenario: nil,
+    assigns: %{},
+    before_each: nil,
+    before_scenario: nil,
+    formatters: [Benchee.Formatters.Console],
+    inputs: nil,
+    load: false,
+    measure_function_call_overhead: false,
+    memory_time: 2.0e9,
+    parallel: 1,
+    percentiles: '2c',
+    pre_check: false,
+    print: %{benchmarking: true, configuration: true, fast_warning: true},
+    profile_after: false,
+    reduction_time: 2.0e9,
+    save: false,
+    time: 5.0e9,
+    title: nil,
+    unit_scaling: :best,
+    warmup: 1.0e9
+  },
+  scenarios: [
+    %Benchee.Scenario{
+      after_each: nil,
+      after_scenario: nil,
+      before_each: nil,
+      before_scenario: nil,
+      function: #Function<45.40011524/0 in :erl_eval.expr/5>,
+      input: :__no_input,
+      input_name: :__no_input,
+      job_name: "with_concatenation",
+      memory_usage_data: %Benchee.CollectionData{
+        samples: [7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240,
+         7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240,
+         7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240,
+         7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240, ...],
+        statistics: %Benchee.Statistics{
+          absolute_difference: nil,
+          average: 7996240.0,
+          ips: nil,
+          maximum: 7996240,
+          median: 7996240.0,
+          minimum: 7996240,
+          mode: 7996240,
+          percentiles: %{50 => 7996240.0, 99 => 7996240.0},
+          relative_less: nil,
+          relative_more: nil,
+          sample_size: 48,
+          std_dev: 0.0,
+          std_dev_ips: nil,
+          std_dev_ratio: 0.0
+        }
+      },
+      name: "with_concatenation",
+      reductions_data: %Benchee.CollectionData{
+        samples: [598564, 590688, 594256, 594312, 594208, 593532, 593528, 594204, 593540, 594004,
+         593328, 593956, 594056, 593372, 593480, 593248, 593952, 593120, 594184, 595008, 594060,
+         594200, 598784, 596360, 595260, 594884, 593796, 595348, 593888, 594392, 595512, 595016,
+         595092, 594136, 594460, ...],
+        statistics: %Benchee.Statistics{
+          absolute_difference: nil,
+          average: 594604.9462365592,
+          ips: nil,
+          maximum: 601372,
+          median: 5.942e5,
+          minimum: 590688,
+          mode: [594208, 593532, 594056, 594352, 594404, 594060],
+          percentiles: %{50 => 5.942e5, 99 => 601372.0},
+          relative_less: nil,
+          relative_more: nil,
+          sample_size: 93,
+          std_dev: 1673.311883696985,
+          std_dev_ips: nil,
+          std_dev_ratio: 0.002814157356557324
+        }
+      },
+      run_time_data: %Benchee.CollectionData{
+        samples: [50183000, 10425000, 12204000, 10722000, 14550000, 10002000, 10428000, 10493000,
+         12410000, 8864000, 10662000, 10184000, 12509000, 8880000, 10594000, 10311000, 12244000,
+         8724000, 11223000, 10631000, 12748000, 8899000, 10603000, 10237000, 12626000, 10686000,
+         10459000, 10380000, 12454000, 8783000, 10347000, 10272000, 12374000, 8687000, ...],
+        statistics: %Benchee.Statistics{
+          absolute_difference: nil,
+          average: 10859351.409978308,
+          ips: 92.08653097653072,
+          maximum: 50183000,
+          median: 1.0597e7,
+          minimum: 8534000,
+          mode: [10459000, 10466000, 8832000, 10598000],
+          percentiles: %{50 => 1.0597e7, 99 => 14597120.0},
+          relative_less: nil,
+          relative_more: nil,
+          sample_size: 461,
+          std_dev: 2293790.875513808,
+          std_dev_ips: 19.451184194812583,
+          std_dev_ratio: 0.21122724451168579
+        }
+      },
+      tag: nil
+    },
+    %Benchee.Scenario{
+      after_each: nil,
+      after_scenario: nil,
+      before_each: nil,
+      before_scenario: nil,
+      function: #Function<45.40011524/0 in :erl_eval.expr/5>,
+      input: :__no_input,
+      input_name: :__no_input,
+      job_name: "with_bitstring",
+      memory_usage_data: %Benchee.CollectionData{
+        samples: [7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240,
+         7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240,
+         7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240,
+         7996240, 7996240, 7996240, 7996240, 7996240, 7996240, 7996240, ...],
+        statistics: %Benchee.Statistics{
+          absolute_difference: 0.0,
+          average: 7996240.0,
+          ips: nil,
+          maximum: 7996240,
+          median: 7996240.0,
+          minimum: 7996240,
+          mode: 7996240,
+          percentiles: %{50 => 7996240.0, 99 => 7996240.0},
+          relative_less: 1.0,
+          relative_more: 1.0,
+          sample_size: 44,
+          std_dev: 0.0,
+          std_dev_ips: nil,
+          std_dev_ratio: 0.0
+        }
+      },
+      name: "with_bitstring",
+      reductions_data: %Benchee.CollectionData{
+        samples: [591104, 590400, 595916, 606576, 597156, 594840, 593984, 593600, 593264, 593476,
+         593708, 594184, 594044, 593276, 592804, 594904, 594032, 594276, 593216, 593264, 595036,
+         594940, 594800, 595252, 594864, 594204, 597056, 595048, 597004, 600524, 595612, 597212,
+         595028, 593916, ...],
+        statistics: %Benchee.Statistics{
+          absolute_difference: 981.9109062979696,
+          average: 595586.8571428572,
+          ips: nil,
+          maximum: 611216,
+          median: 594776.0,
+          minimum: 590400,
+          mode: [593916, 593264],
+          percentiles: %{50 => 594776.0, 99 => 611216.0},
+          relative_less: 0.9983513556511163,
+          relative_more: 1.0016513668655345,
+          sample_size: 91,
+          std_dev: 3213.8393120704595,
+          std_dev_ips: nil,
+          std_dev_ratio: 0.005396088368181687
+        }
+      },
+      run_time_data: %Benchee.CollectionData{
+        samples: [47036000, 10423000, 10743000, 10567000, 13411000, 10563000, 10746000, 10506000,
+         12603000, 8796000, 10767000, 11651000, 12352000, 8732000, 10920000, 10646000, 12252000,
+         8761000, 10456000, 10274000, 13206000, 9103000, 10741000, 10932000, 12784000, 10793000,
+         10610000, 10259000, 12502000, 8801000, 10350000, 10338000, 12221000, ...],
+        statistics: %Benchee.Statistics{
+          absolute_difference: 43504.799172019586,
+          average: 10902856.209150327,
+          ips: 91.71908542283997,
+          maximum: 47036000,
+          median: 1.0611e7,
+          minimum: 8506000,
+          mode: [10318000, 12261000],
+          percentiles: %{50 => 1.0611e7, 99 => 15107799.999999987},
+          relative_less: 0.9960097796084381,
+          relative_more: 1.004006206036582,
+          sample_size: 459,
+          std_dev: 2260212.8269141307,
+          std_dev_ips: 19.01379320875142,
+          std_dev_ratio: 0.20730465334553574
+        }
+      },
+      tag: nil
+    },
+    %Benchee.Scenario{
+      after_each: nil,
+      after_scenario: nil,
+      before_each: nil,
+      before_scenario: nil,
+      function: #Function<45.40011524/0 in :erl_eval.expr/5>,
+      input: :__no_input,
+      input_name: :__no_input,
+      job_name: "with_iolist",
+      memory_usage_data: %Benchee.CollectionData{
+        samples: [14400584, 14400584, 14400584, 14400584, 14400584, 14400584, 14400584, 14400584,
+         14400584, 14400584, 14400584, 14400584, 14400584, 14400584, 14400584, 14400584, 14400584,
+         14400584, 14400584, 14400584, 14400584, 14400584, 14400584, 14400584, 14400584, 14400584,
+         14400584, 14400584, 14400584, 14400584, 14400584, 14400584, 14400584, 14400584, 14400584,
+         ...],
+        statistics: %Benchee.Statistics{
+          absolute_difference: 6404344.0,
+          average: 14400584.0,
+          ips: nil,
+          maximum: 14400584,
+          median: 14400584.0,
+          minimum: 14400584,
+          mode: 14400584,
+          percentiles: %{50 => 14400584.0, 99 => 14400584.0},
+          relative_less: 0.5552719250830384,
+          relative_more: 1.8009194321331026,
+          sample_size: 53,
+          std_dev: 0.0,
+          std_dev_ips: nil,
+          std_dev_ratio: 0.0
+        }
+      },
+      name: "with_iolist",
+      reductions_data: %Benchee.CollectionData{
+        samples: [1973718, 1969482, 1975410, 1976290, 1980822, 1972026, 1972130, 1970310, 1978122,
+         1971394, 1967950, 1968738, 1983750, 1973814, 1967990, 1970858, 1970670, 1971694, 1981010,
+         1986850, 1970826, 1967614, 1970282, 1970630, 1969594, 1969618, 1966802, 1967954, 1972966,
+         1971506, 1984966, 1974826, 1979454, ...],
+        statistics: %Benchee.Statistics{
+          absolute_difference: 1380094.475985663,
+          average: 1974699.4222222222,
+          ips: nil,
+          maximum: 1989786,
+          median: 1972966.0,
+          minimum: 1966802,
+          mode: nil,
+          percentiles: %{50 => 1972966.0, 99 => 1989786.0},
+          relative_less: 0.30111162212597514,
+          relative_more: 3.32102757422506,
+          sample_size: 45,
+          std_dev: 6067.51464203533,
+          std_dev_ips: nil,
+          std_dev_ratio: 0.0030726269394494837
+        }
+      },
+      run_time_data: %Benchee.CollectionData{
+        samples: [10405000, 18051000, 15108000, 12419000, 14481000, 13725000, 14118000, 12092000,
+         15301000, 14036000, 20240000, 11908000, 17973000, 18231000, 19298000, 10312000, 16151000,
+         12194000, 27645000, 17250000, 21847000, 19294000, 20263000, 20132000, 20003000, 20767000,
+         20390000, 20120000, 20166000, 20196000, 20280000, 19871000, ...],
+        statistics: %Benchee.Statistics{
+          absolute_difference: 12656310.561852679,
+          average: 23515661.971830986,
+          ips: 42.52485008492991,
+          maximum: 41481000,
+          median: 2.232e7,
+          minimum: 10312000,
+          mode: [19871000, 15488000],
+          percentiles: %{50 => 2.232e7, 99 => 38790519.99999998},
+          relative_less: 0.46179229072889977,
+          relative_more: 2.1654757346026394,
+          sample_size: 213,
+          std_dev: 6662149.928380242,
+          std_dev_ips: 12.047584596472976,
+          std_dev_ratio: 0.2833069269476963
+        }
+      },
+      tag: nil
+    }
+  ],
+  system: %{
+    available_memory: "8 GB",
+    cpu_speed: "Apple M1",
+    elixir: "1.13.3",
+    erlang: "24.0.1",
+    num_cores: 8,
+    os: :macOS
+  }
+}
+```
