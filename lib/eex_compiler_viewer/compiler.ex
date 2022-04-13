@@ -44,7 +44,6 @@ defmodule EExCompiler.Compiler do
   # It returns Macro.t/0 or it raises.
 
   defp generate_buffer([{:text, line, column, chars} | rest], buffer, scope, state) do
-    Agent.update(:collector, fn list -> [buffer | list] end)
     buffer =
       if function_exported?(state.engine, :handle_text, 3) do
         meta = [line: line, column: column]
@@ -54,14 +53,16 @@ defmodule EExCompiler.Compiler do
         state.engine.handle_text(buffer, IO.chardata_to_string(chars))
       end
 
+    Agent.update(:collector, fn list -> [%{name: :text, buffer: buffer} | list] end)
+
     generate_buffer(rest, buffer, scope, state)
   end
 
   defp generate_buffer([{:expr, line, column, mark, chars} | rest], buffer, scope, state) do
-    Agent.update(:collector, fn list -> [buffer | list] end)
     options = [file: state.file, line: line, column: column(column, mark)] ++ state.parser_options
     expr = Code.string_to_quoted!(chars, options)
     buffer = state.engine.handle_expr(buffer, IO.chardata_to_string(mark), expr)
+    Agent.update(:collector, fn list -> [%{name: :expr, buffer: buffer} | list] end)
     generate_buffer(rest, buffer, scope, state)
   end
 
@@ -71,7 +72,6 @@ defmodule EExCompiler.Compiler do
          scope,
          state
        ) do
-    Agent.update(:collector, fn list -> [buffer | list] end)
     if mark != '=' do
       message =
         "the contents of this expression won't be output unless the EExCompiler block starts with \"<%=\""
@@ -97,6 +97,7 @@ defmodule EExCompiler.Compiler do
       )
 
     buffer = state.engine.handle_expr(buffer, IO.chardata_to_string(mark), contents)
+    Agent.update(:collector, fn list -> [%{name: :start_expr, buffer: buffer} | list] end)
     generate_buffer(rest, buffer, scope, state)
   end
 
@@ -106,9 +107,9 @@ defmodule EExCompiler.Compiler do
          [current | scope],
          state
        ) do
-    Agent.update(:collector, fn list -> [buffer | list] end)
     {wrapped, state} = wrap_expr(current, line, buffer, chars, state)
     state = %{state | line: line}
+    Agent.update(:collector, fn list -> [%{name: :middle_expr, buffer: wrapped} | list] end)
     generate_buffer(rest, state.engine.handle_begin(buffer), [wrapped | scope], state)
   end
 
@@ -118,7 +119,8 @@ defmodule EExCompiler.Compiler do
          [_ | _] = scope,
          state
        ) do
-    Agent.update(:collector, fn list -> [buffer | list] end)
+    Agent.update(:collector, fn list -> [%{name: :middle_expr, buffer: buffer} | list] end)
+
     message =
       "unexpected beginning of EEx tag \"<%#{modifier}\" on \"<%#{modifier}#{chars}%>\", " <>
         "please remove \"#{modifier}\" accordingly"
@@ -143,12 +145,13 @@ defmodule EExCompiler.Compiler do
          [current | _],
          state
        ) do
-    Agent.update(:collector, fn list -> [buffer | list] end)
     {wrapped, state} = wrap_expr(current, line, buffer, chars, state)
     column = state.start_column
     options = [file: state.file, line: state.start_line, column: column] ++ state.parser_options
     tuples = Code.string_to_quoted!(wrapped, options)
     buffer = insert_quoted(tuples, state.quoted)
+
+    # Agent.update(:collector, fn list -> [%{name: :end_expr, buffer: buffer} | list] end)
     {buffer, rest}
   end
 
@@ -177,8 +180,9 @@ defmodule EExCompiler.Compiler do
   end
 
   defp generate_buffer([{:eof, _, _}], buffer, [], state) do
-    Agent.update(:collector, fn list -> [buffer | list] end)
-    state.engine.handle_body(buffer)
+    buffer = state.engine.handle_body(buffer)
+    Agent.update(:collector, fn list -> [%{name: :eof, buffer: buffer} | list] end)
+    buffer
   end
 
   defp generate_buffer([{:eof, line, column}], _buffer, _scope, state) do
@@ -251,4 +255,3 @@ defmodule EExCompiler.Compiler do
     column + 2 + length(mark)
   end
 end
-
